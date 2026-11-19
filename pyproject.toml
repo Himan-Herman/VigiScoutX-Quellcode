@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vigiscoutx"
+version = "0.1.0"
+description = "Wissenschaftlicher Prototyp eines risikobasierten Multi-Signal-Monitorings"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "pydantic>=2.7,<3",
+    "PyYAML>=6.0,<7",
+    # PyTorch und TorchVision sind gekoppelt; exakte Umgebung in requirements-lock.txt.
+    "torch==2.14.*",
+    "torchvision==0.29.*",
+    "Pillow>=12.3,<13",
+    # Monitoring-Methoden G1–G4 (DEC-034); exakter KS-Test über SciPy, Version gepinnt.
+    "numpy>=2.5,<3",
+    "scipy==1.18.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "ruff>=0.5",
+    "mypy>=1.10",
+    "types-PyYAML",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "experiments/runners"]
+addopts = "-q --strict-markers"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "tests", "experiments/runners"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+# Deutsche Texte verwenden typografische Zeichen (–, −, ≥).
+ignore = ["RUF001", "RUF002", "RUF003"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+mypy_path = "src:experiments/runners"
+files = ["src", "tests", "experiments/runners"]
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["torchvision", "torchvision.*", "scipy", "scipy.*"]
+ignore_missing_imports = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
